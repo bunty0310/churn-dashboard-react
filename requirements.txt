@@ -4,3 +4,4 @@ scikit-learn
 mlflow
 Flask
 gunicorn
+Flask-CORS

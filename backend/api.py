@@ -1,14 +1,16 @@
-# backend/api.py
 import pandas as pd
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 import os
 
-## --- App & Model Loading ---
-app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
+# Initialize a Flask app
+app = Flask(__name__)
+# Enable CORS to allow requests from your frontend's domain
+CORS(app)
 
-# Path to the model file inside the container
-MODEL_PATH = "/app/saved_artifacts/churn_model.joblib"
+# --- Model Loading ---
+MODEL_PATH = "saved_artifacts/churn_model.joblib"
 
 def load_model():
     """Loads the model from the specified path."""
@@ -23,11 +25,11 @@ def load_model():
 
 model = load_model()
 
-## --- API Endpoints ---
+# --- API Endpoints ---
 @app.route("/api/predict", methods=['POST'])
 def predict():
     if model is None:
-        return jsonify({'error': 'Model is not available'}), 503
+        return jsonify({'error': 'Model is not available, please check server logs.'}), 503
     try:
         data = request.get_json(force=True)
         df = pd.DataFrame(data, index=[0])
@@ -39,11 +41,7 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-## --- Serve React Frontend ---
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path != "" and os.path.exists(app.static_folder + '/' + path):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
+@app.route("/")
+def health_check():
+    """A simple health check endpoint."""
+    return "Backend API is running!"

@@ -37,7 +37,7 @@ function App() {
     setPrediction(null); // Clear previous prediction
 
     // The API endpoint is relative because our Flask server will serve this app.
-    const API_URL = '/api/predict';
+    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api/predict';
 
     try {
       // We use axios to send a POST request with the form data to our backend.
